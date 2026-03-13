@@ -3,16 +3,11 @@ workflows:
     name: iOS Workflow
     instance_type: mac_mini_m1
     environment:
-      ios_signing:
-        provisioning_profiles:
-          - name: default_profile
       xcode: latest
       cocoapods: default
     triggering:
       events:
         - push
-      branch:
-        - main
     scripts:
       - name: Get Flutter packages
         script: |
@@ -22,7 +17,3 @@ workflows:
           flutter build ios --release --no-codesign
     artifacts:
       - build/ios/iphoneos/*.app
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
