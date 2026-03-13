@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html';
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ApiService {
   final String host;
   final int port;
   late String sessionId;
+  WebSocketChannel? _webSocketChannel;
 
   ApiService({this.host = '10.0.2.2', this.port = 5556});
 
@@ -74,6 +76,49 @@ class ApiService {
   }
 
   Future<String> _sendCommand(String command) async {
+    try {
+      // Platform-specific implementation
+      if (_isWeb()) {
+        return await _sendCommandWeb(command);
+      } else {
+        return await _sendCommandNative(command);
+      }
+    } catch (e) {
+      throw Exception('Communication error: $e');
+    }
+  }
+
+  bool _isWeb() {
+    try {
+      // Web platformu kontrolü
+      return identical(0, 0.0) == false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Web platformu için host ve port ayarla
+  void setWebHost(String newHost, int newPort) {
+    host = newHost;
+    port = newPort;
+  }
+
+  Future<String> _sendCommandWeb(String command) async {
+    try {
+      final wsUrl = 'ws://$host:$port';
+      _webSocketChannel = WebSocketChannel.connect(Uri.parse(wsUrl));
+
+      _webSocketChannel!.sink.add(command);
+      final response = await _webSocketChannel!.stream.first;
+      _webSocketChannel!.sink.close();
+
+      return response.toString();
+    } catch (e) {
+      throw Exception('WebSocket error: $e');
+    }
+  }
+
+  Future<String> _sendCommandNative(String command) async {
     try {
       final socket = await Socket.connect(host, port,
           timeout: Duration(seconds: 10));

@@ -20,6 +20,13 @@ class _AuthScreenState extends State<AuthScreen> {
   void initState() {
     super.initState();
     apiService = ApiService();
+    
+    // Web sürümü için varsayılan değerleri ayarla
+    final isWeb = identical(0, 0.0) == false;
+    if (isWeb) {
+      hostController.text = 'localhost';
+      portController.text = '5556';
+    }
   }
 
   Future<void> authenticate() async {
