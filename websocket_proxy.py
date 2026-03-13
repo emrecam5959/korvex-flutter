@@ -35,8 +35,13 @@ async def proxy_handler(websocket, path):
             """WebSocket'ten gelen mesajları TCP'ye gönder"""
             try:
                 async for message in websocket:
-                    log(f"WebSocket'ten gelen mesaj: {message[:100]}...")
-                    writer.write(message.encode() + b'\n')
+                    # Mesaj string ise encode et, bytes ise olduğu gibi kullan
+                    if isinstance(message, str):
+                        data = message.encode('utf-8') + b'\n'
+                    else:
+                        data = message + b'\n'
+                    log(f"WebSocket'ten gelen mesaj: {str(message)[:100]}...")
+                    writer.write(data)
                     await writer.drain()
             except Exception as e:
                 log(f"WebSocket okuma hatası: {e}")

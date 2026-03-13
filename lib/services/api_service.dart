@@ -77,11 +77,8 @@ class ApiService {
 
   Future<String> _sendCommand(String command) async {
     try {
-      if (_isWeb()) {
-        return await _sendCommandWeb(command);
-      } else {
-        return await _sendCommandNative(command);
-      }
+      // Web platformunda WebSocket kullan
+      return await _sendCommandWeb(command);
     } catch (e) {
       throw Exception('Communication error: $e');
     }
